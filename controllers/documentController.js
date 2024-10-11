@@ -1,5 +1,6 @@
 const Document = require('../models/Document');
 
+//Document
 exports.createDocument = async (req, res) => {
   const { title, content } = req.body;
 
@@ -68,6 +69,7 @@ exports.deleteDocument = async (req, res) => {
   }
 };
 
+ //Document Comments
 exports.addComment = async (req, res) => {
     const { id } = req.params;
     const { text } = req.body;
@@ -90,4 +92,56 @@ exports.addComment = async (req, res) => {
       res.status(500).json({ error: 'Server error' });
     }
   };
+
+
+   
+  exports.resolveComment = async (req, res) => {
+    const { id, commentId } = req.params;
+  
+    try {
+      const document = await Document.findById(id);
+      if (!document) {
+        return res.status(404).json({ error: 'Document not found' });
+      }
+  
+      const comment = document.comments.id(commentId);
+      if (!comment) {
+        return res.status(404).json({ error: 'Comment not found' });
+      }
+  
+      comment.resolved = true;
+      await document.save();
+      res.json(document);
+    } catch (err) {
+      res.status(500).json({ error: 'Server error' });
+    }
+  };
+
+
+  exports.deleteComment = async (req, res) => {
+    const { id, commentId } = req.params;
+  
+    try {
+      const document = await Document.findById(id);
+      if (!document) {
+        return res.status(404).json({ error: 'Document not found' });
+      }
+  
+      const updatedDocument = await Document.findByIdAndUpdate(
+        id,
+        { $pull: { comments: { _id: commentId } } }, 
+        { new: true } 
+      );
+  
+      if (!updatedDocument) {
+        return res.status(404).json({ error: 'Comment not found' });
+      }
+  
+      res.json({ message: 'Comment deleted successfully', updatedDocument });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Server error' });
+    }
+  };
+  
   

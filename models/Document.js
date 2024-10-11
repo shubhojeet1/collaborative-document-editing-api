@@ -19,6 +19,7 @@ const documentSchema = new mongoose.Schema({
     {
       userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
       text: String,
+      resolved: { type: Boolean, default: false },
       timestamp: { type: Date, default: Date.now },
     },
   ],
